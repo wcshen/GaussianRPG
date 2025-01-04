@@ -27,6 +27,7 @@ class Controller(Node):
             self.get_logger().error('arg: brake_distance')
         else:
             self.brake_distance = float(sys.argv[1])
+            self.get_logger().info('brake_distance: "%s"' % self.brake_distance)
 
         self.publisher_command = self.create_publisher(TwistStamped, 'control_cmd', 10)
 

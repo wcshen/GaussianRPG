@@ -59,6 +59,7 @@ class MainFrame(Node):
     def __init__(self):
         super().__init__('gaussian_rpg')
         self.publisher_pose = self.create_publisher(PoseWithCovarianceStamped, 'cam_pose', 10)
+        self.publisher_info = self.create_publisher(String, 'rendering', 10)
         self.subscription = self.create_subscription(
             TwistStamped,
             'control_cmd',
@@ -66,7 +67,7 @@ class MainFrame(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.timer_period = 0.02  # the simulator runs at 50Hz, a higher freq base.
+        self.timer_period = 0.001  # the rendering frame takes longer, so other frames have to go quicker.
         self.frame_timer = self.create_timer(self.timer_period, self.next_frame)
 
         self.last_pose_dict = {"position": [0.0, 0.0, 0.0]}
@@ -226,6 +227,7 @@ class MainFrame(Node):
                 cam_sample.meta['timestamp'] = self.timestamp
                 cam_sample.image_name = '000%s_0' % cam_sample.meta['frame']
                 self.cam_sample = cam_sample
+                print("rendering: %d" % self.idx)
                 self.render()
 
             end_time = time.perf_counter()
@@ -234,7 +236,7 @@ class MainFrame(Node):
     def render(self):
         start_time = time.perf_counter()
         # print('image_publisher: ', self.cam_sample.meta['timestamp'])
-        result = self.renderer.render_all(self.cam_sample, self.gaussians)
+        result = self.renderer.render_all(self.cam_sample, self.gaussians)['rgb']
         rgb = (result.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
 
         # Convert numpy array to QImage
@@ -251,6 +253,9 @@ class MainFrame(Node):
 
         end_time = time.perf_counter()
         print(f"2执行时间：{end_time - start_time} 秒")
+        msg = String()
+        msg.data = 'rendering ...'
+        self.publisher_info.publish(msg)
 
         self.sync_lock = False
 
