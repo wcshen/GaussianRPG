@@ -59,7 +59,7 @@ class MainFrame(Node):
     def __init__(self):
         super().__init__('gaussian_rpg')
         self.publisher_pose = self.create_publisher(PoseWithCovarianceStamped, 'cam_pose', 10)
-        self.publisher_info = self.create_publisher(String, 'rendering', 10)
+        # self.publisher_info = self.create_publisher(String, 'rendering', 10)
         self.subscription = self.create_subscription(
             TwistStamped,
             'control_cmd',
@@ -138,7 +138,7 @@ class MainFrame(Node):
 
     def next_frame(self):
         if not self.sync_lock:
-            start_time = time.perf_counter()
+            # start_time = time.perf_counter()
             # if no controller activated in loop: cam poses come from the "cams_tape.json" traj record file:
             if self.idx < self.traj_length:
                 pose = self.traj['frames'][self.idx]
@@ -229,22 +229,22 @@ class MainFrame(Node):
                 cam_sample.meta['timestamp'] = self.timestamp
                 cam_sample.image_name = '000%s_0' % cam_sample.meta['frame']
                 self.cam_sample = cam_sample
-                print("rendering: %d" % self.idx)
+                # print("rendering: %d" % self.idx)
                 self.render()
 
-            end_time = time.perf_counter()
-            print(f"1执行时间：{end_time - start_time} 秒")
+            # end_time = time.perf_counter()
+            # print(f"1执行时间：{end_time - start_time} 秒")
 
     def render(self):
-        start_time = time.perf_counter()
+        # start_time = time.perf_counter()
         # print('image_publisher: ', self.cam_sample.meta['timestamp'])
         result = self.renderer.render_all(self.cam_sample, self.gaussians)['rgb']
         rgb = (result.detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
 
         # Convert numpy array to QImage
         height, width, channel = rgb.shape
-        print(height)
-        print(width)
+        # print(height)
+        # print(width)
         bytes_per_line = 3 * width
         q_image = QImage(rgb.tobytes(), width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_image)
@@ -253,11 +253,11 @@ class MainFrame(Node):
 
         self.app.processEvents()  # Update the GUI
 
-        end_time = time.perf_counter()
-        print(f"2执行时间：{end_time - start_time} 秒")
-        msg = String()
-        msg.data = 'rendering ...'
-        self.publisher_info.publish(msg)
+        # end_time = time.perf_counter()
+        # print(f"2执行时间：{end_time - start_time} 秒")
+        # msg = String()
+        # msg.data = 'rendering ...'
+        # self.publisher_info.publish(msg)
 
         self.sync_lock = False
 
