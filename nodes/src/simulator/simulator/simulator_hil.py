@@ -70,6 +70,8 @@ class MainFrame(Node):
         self.timer_period = 0.001  # the rendering frame takes longer, so other frames have to go quicker.
         self.frame_timer = self.create_timer(self.timer_period, self.next_frame)
 
+        self.time_step = 0.02 # time_step: used to calculate the car velocity
+
         self.last_pose_dict = {"position": [0.0, 0.0, 0.0]}
         self.forward_velocity = 0.0
         self.command_brake = 0.0
@@ -143,11 +145,11 @@ class MainFrame(Node):
                 self.timestamp = pose['timestamp']
             else:
                 pose = self.traj['frames'][-1]
-                self.timestamp = pose['timestamp'] + (self.idx - self.traj_length + 1) * self.timer_period
+                self.timestamp = pose['timestamp'] + (self.idx - self.traj_length + 1) * self.time_step
 
             # simple "car dynamics" part:
             if self.controller_activated:
-                velocity_step = self.forward_velocity + self.command_brake * self.timer_period
+                velocity_step = self.forward_velocity + self.command_brake * self.time_step
                 if velocity_step < 0:
                     velocity_step = 0
                 # print("velocity_step: ", velocity_step)
@@ -160,7 +162,7 @@ class MainFrame(Node):
 
                 # update cam position
                 update_cam = np.array(cam_trans)
-                update_cam = update_cam + velocity_step * self.timer_period * cam_direction_vector
+                update_cam = update_cam + velocity_step * self.time_step * cam_direction_vector
                 pose['rotation_matrix'] = cam_rot
                 pose['position'] = update_cam.tolist()
 
@@ -188,7 +190,7 @@ class MainFrame(Node):
             self.sync_iter = self.sync_iter + 1
             self.publisher_pose.publish(msg)
             self.forward_velocity = np.linalg.norm(np.array(pose['position'])
-                                                   - np.array(self.last_pose_dict['position']))/self.timer_period
+                                                   - np.array(self.last_pose_dict['position']))/self.time_step
             self.last_pose_dict = pose
             # print("velocity: ", self.forward_velocity)
             # # for debug:
