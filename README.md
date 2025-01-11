@@ -10,6 +10,8 @@ In this project, a simulator has been developed. Street_Gaussians is responsible
 
 ![pipeline](images/pipeline.jpg)
 
+**GaussianRPG v2.0 is launched!!**
+
 ### Examples:
 
 Waymo Scene 002:
@@ -212,6 +214,28 @@ $7: the collision distance threshold (m).
 
 $8: the braking distance threshold (m), in dummy controller, there is no TTC concept, so the braking distance is made as an argument.
 ```
+
+### GaussianRPG v2.0
+
+A hardware-in-the-loop simulation system demo is developed based on the v1.0 software-in-the-loop GaussianRPG and an D-Robotics RDK X5 suite. 
+
+![pipeline](images/HIL_frame.jpg)
+
+```
+cd nodes
+
+# scene 002:
+./scripts/simulator_launch_hil.sh ../output/waymo_full_exp/waymo_train_002_1cam/trajectory/ours_50000/cams_tape.json ../data/waymo/training/002/track/track_info.txt 98 6 waymo_train_002_1cam.yaml 10.0 2.0 25.0
+
+# scene 124:
+./scripts/simulator_launch_hil.sh ../output/waymo_full_exp/waymo_train_124_1cam/trajectory/ours_50000/cams_tape.json ../data/waymo/training/124/track/track_info.txt 0 57 waymo_train_124_1cam.yaml 7.0 2.0 20.0
+
+# scene 149:
+./scripts/simulator_launch_hil.sh ../output/waymo_full_exp/waymo_train_149_1cam/trajectory/ours_50000/cams_tape.json ../data/waymo/training/149/track/track_info.txt 10 21 waymo_train_149_1cam.yaml 7.5 2.0 21.0
+```
+
+More details about the system are on the wiki page: [Hardware in the loop](https://github.com/GimpelZhang/GaussianRPG/wiki/Hardware-in-the-loop)
+
 ### Acknowledgments
 The original Street_Gaussians work: [Street Gaussians](https://github.com/zju3dv/street_gaussians). 
 

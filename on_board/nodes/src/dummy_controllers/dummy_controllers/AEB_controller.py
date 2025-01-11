@@ -27,6 +27,7 @@ class Controller(Node):
             self.get_logger().error('arg: brake_distance')
         else:
             self.brake_distance = float(sys.argv[1])
+            self.get_logger().info('brake_distance: "%s"' % self.brake_distance)
 
         self.publisher_command = self.create_publisher(TwistStamped, 'control_cmd', 10)
 
@@ -62,6 +63,7 @@ class Controller(Node):
         time_stamp = float(msg.header.stamp.sec) + float(msg.header.stamp.nanosec) / 1e9
         self.get_logger().info('timestamp: "%s"' % time_stamp)
         self.get_logger().info('cipv: "%s"' % self.cipv_lon_dist)
+        self.get_logger().info('lon_velocity: "%s"' % self.lon_velocity)
 
         command_msg = TwistStamped()
         command_msg.header = msg.header
@@ -74,9 +76,9 @@ class Controller(Node):
 
         if self.cipv_lon_dist < self.brake_distance:
             if self.lon_velocity > 2:
-                command_msg.twist.linear.x = -13.5  # m/s^2
+                command_msg.twist.linear.x = -15.5  # m/s^2
             elif self.lon_velocity > 1:
-                command_msg.twist.linear.x = -10.0
+                command_msg.twist.linear.x = -13.0
             elif self.lon_velocity > 0.001:
                 command_msg.twist.linear.x = -8.0
             else:

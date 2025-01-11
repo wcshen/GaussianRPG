@@ -96,34 +96,14 @@ class ObjectDetector(Node):
 
     def __init__(self):
         super().__init__('object_detector')
-        
-        # if len(sys.argv) < 2:
-        #     self.get_logger().error('arg: yolov5_weights_path')
-        #     return
-        # else:
-        #     self.weights = sys.argv[1]
 
         self.item_id = 0
 
         self.publisher_objects = self.create_publisher(PoseArray, 'objects', 10)
 
-        # self.subscription_image = self.create_subscription(
-        #     ROS2_Image,
-        #     'front_image',
-        #     self.image_callback,
-        #     10)
-
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        # self.subscription_image  # prevent unused variable warning
-        self.conf_thres = 0.25  # confidence threshold
-        self.iou_thres = 0.45  # NMS IOU threshold
-        self.max_det = 10  # maximum detections per image
-        self.device = ''  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        self.classes = None  # filter by class: --class 0, or --class 0 2 3
-        self.agnostic_nms = False  # class-agnostic NMS
-        self.augment = False  # augmented inference
         extr = np.array(
             [[0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
         # we directly use the waymo settings here:
@@ -135,10 +115,6 @@ class ObjectDetector(Node):
         self.intrinsics = intr
         self.W = 1600
         self.H = 1066
-        self.imgsz = 1600  # inference size (pixels)
-        # print("self.imgsz: ", self.imgsz)
-
-        # self.device = select_device(self.device)
 
         # Load model
         self.models = dnn.load('/app/model/basic/yolov5s_672x672_nv12.bin')
@@ -306,12 +282,12 @@ class ObjectDetector(Node):
         # img_file = cv2.imread('./kite.jpg')
         resized_data = cv2.resize(img_file, self.des_dim, interpolation=cv2.INTER_AREA)
         nv12_data = self.bgr2nv12_opencv(resized_data)
-        # yolov5 detection results saved for debugging:
-        rgb_result = img_file.copy()
-        t0 = time.time()
+        # # yolov5 detection results saved for debugging:
+        # rgb_result = img_file.copy()
+        # t0 = time.time()
         outputs = self.models[0].forward(nv12_data)
-        t1 = time.time()
-        print("inferece time is :", (t1 - t0))
+        # t1 = time.time()
+        # print("inferece time is :", (t1 - t0))
 
         output_tensors = (hbDNNTensor_t * len(self.models[0].outputs))()
         for i in range(len(self.models[0].outputs)):
@@ -338,8 +314,8 @@ class ObjectDetector(Node):
 
         if len(data) > 0:
             print(self.item_id)
-            # yolov5 detection results saved for debugging:
-            save_path = '/home/sunrise/ros2_ws/nodes/' + '000%s_0' % self.item_id + '.jpg'
+            # # yolov5 detection results saved for debugging:
+            # save_path = '/home/sunrise/ros2_ws/nodes/' + '000%s_0' % self.item_id + '.jpg'
             self.item_id += 1
 
             # 遍历每一个结果  
@@ -350,7 +326,7 @@ class ObjectDetector(Node):
                 name = result['name']  # 类别名称  
             
                 # 打印信息  
-                print(f"bbox: {bbox}, score: {score}, id: {id}, name: {name}")
+                # print(f"bbox: {bbox}, score: {score}, id: {id}, name: {name}")
 
                 if not name in ['person', 'chair', 'car', 'truck', 'bicycle', 'motorcycle','bus','traffic light', 'stop sign']:
                     continue
@@ -376,17 +352,17 @@ class ObjectDetector(Node):
                     object_pose.orientation.w = 1.0
                     detection_msg.poses.append(object_pose)
                 
-                # yolov5 detection results saved for debugging:
-                hide_labels = False
-                line_thickness = 3
-                label = None if hide_labels else name
-                if label != None and distance != 0:
-                    label = label + ' ' + str('%.1f' % d[0]) + 'm' + str('%.1f' % d[1]) + 'm'
+                # # yolov5 detection results saved for debugging:
+                # hide_labels = False
+                # line_thickness = 3
+                # label = None if hide_labels else name
+                # if label != None and distance != 0:
+                #     label = label + ' ' + str('%.1f' % d[0]) + 'm' + str('%.1f' % d[1]) + 'm'
                 
-                self.plot_one_box(bbox, rgb_result, label=label, line_thickness=line_thickness)
+                # self.plot_one_box(bbox, rgb_result, label=label, line_thickness=line_thickness)
 
-            # yolov5 detection results saved for debugging:
-            cv2.imwrite(save_path, rgb_result)
+            # # yolov5 detection results saved for debugging:
+            # cv2.imwrite(save_path, rgb_result)
         self.publisher_objects.publish(detection_msg)
 
 
